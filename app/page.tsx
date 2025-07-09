@@ -37,53 +37,139 @@ const ProfessionalRoulette = ({
   isSpinning,
   mustSpin,
   setMustSpin,
-  hasSpunOnce
+  hasSpunOnce,
+  handleSpinClick,
+  rouletteState,
+  attemptCount
 }: {
   onSpinComplete: (result: string) => void
   isSpinning: boolean
   mustSpin: boolean
   setMustSpin: (v: boolean) => void
   hasSpunOnce: boolean
+  handleSpinClick: () => void
+  rouletteState: 'idle' | 'spinning' | 'stopping' | 'completed'
+  attemptCount: number
 }) => {
-  const [prizeNumber, setPrizeNumber] = useState(0) // SEMPRE começar no "Try Again"
+  const [prizeNumber, setPrizeNumber] = useState(0)
 
-  // Dados da roleta - ORDEM IMPORTANTE!
+  // Dados da roleta - REPLICANDO EXATAMENTE O DESIGN DA IMAGEM
   const data = [
-    { option: 'Try Again', style: { backgroundColor: '#FF6B6B', textColor: '#FFFFFF' } }, // ÍNDICE 0
-    { option: '75% OFF', style: { backgroundColor: '#232F3E', textColor: '#FFFFFF' } },    // ÍNDICE 1
-    { option: '50% OFF', style: { backgroundColor: '#FFFFFF', textColor: '#232F3E' } },
-    { option: '25% OFF', style: { backgroundColor: '#FF9900', textColor: '#FFFFFF' } },
-    { option: '10% OFF', style: { backgroundColor: '#232F3E', textColor: '#FFFFFF' } },
-    { option: '5% OFF', style: { backgroundColor: '#FFFFFF', textColor: '#232F3E' } },
-    { option: 'Free Shipping', style: { backgroundColor: '#4ECDC4', textColor: '#FFFFFF' } },
-    { option: '30% OFF', style: { backgroundColor: '#FF9900', textColor: '#FFFFFF' } },
+    { 
+      option: '75% off',
+      style: { 
+        backgroundColor: '#E91E63', // Rosa/Pink
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 0 - 75% será esse na segunda tentativa
+    { 
+      option: '50% off',
+      style: { 
+        backgroundColor: '#4ECDC4', // Verde água/Turquesa  
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 1
+    { 
+      option: '25% off',
+      style: { 
+        backgroundColor: '#2196F3', // Azul
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 2
+    { 
+      option: '5% off',
+      style: { 
+        backgroundColor: '#FFC107', // Amarelo/Dourado
+        textColor: '#000000',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 3
+    { 
+      option: '30% off',
+      style: { 
+        backgroundColor: '#FF5722', // Laranja/Vermelho
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 4
+    { 
+      option: '10% off',
+      style: { 
+        backgroundColor: '#9C27B0', // Roxo
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 5
+    { 
+      option: 'Free shipping',
+      style: { 
+        backgroundColor: '#607D8B', // Cinza azulado
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    }, // ÍNDICE 6
+    { 
+      option: 'Try Again',
+      style: { 
+        backgroundColor: '#795548', // Marrom
+        textColor: '#FFFFFF',
+        fontSize: 22
+      } 
+    } // ÍNDICE 7 - Try Again na primeira tentativa
   ]
 
   useEffect(() => {
     if (mustSpin) {
-      console.log('🎲 Starting spin - Attempt:', hasSpunOnce ? '2nd' : '1st')
+      console.log('🎲 Iniciando spin - Tentativa:', attemptCount)
+      console.log('🔍 mustSpin =', mustSpin, '| attemptCount =', attemptCount)
       
-      // LÓGICA SIMPLES E DIRETA:
+      // LÓGICA CORRIGIDA: usar attemptCount atual (já incrementado)
       let targetIndex: number
-      if (!hasSpunOnce) {
-        targetIndex = 0 // PRIMEIRA TENTATIVA: "Try Again" (índice 0)
+      if (attemptCount === 1) {
+        targetIndex = 7 // PRIMEIRA TENTATIVA: "Try Again" (índice 7)
+        console.log('🎯 PRIMEIRA tentativa (attemptCount=1) - deve cair em Try Again (índice 7)')
+        console.log('🔍 data[7].option =', data[7]?.option)
+      } else if (attemptCount === 2) {
+        targetIndex = 0 // SEGUNDA TENTATIVA: "75% off" (índice 0)  
+        console.log('🎯 SEGUNDA tentativa (attemptCount=2) - deve cair em 75% off (índice 0)')
+        console.log('🔍 data[0].option =', data[0]?.option)
       } else {
-        targetIndex = 1 // SEGUNDA TENTATIVA: "75% OFF" (índice 1)  
+        // Terceira tentativa ou mais - resultado aleatório entre descontos
+        const discountIndexes = [0, 1, 2, 3, 4, 5, 6]; // Todos exceto Try Again
+        targetIndex = discountIndexes[Math.floor(Math.random() * discountIndexes.length)];
+        console.log('🎯 TERCEIRA+ tentativa (attemptCount=' + attemptCount + ') - resultado random (índice ' + targetIndex + ')')
+        console.log('🔍 data[' + targetIndex + '].option =', data[targetIndex]?.option)
       }
       
-      console.log('🎯 Target index:', targetIndex, 'Target option:', data[targetIndex]?.option)
+      console.log('🎯 Target index FINAL definido:', targetIndex, 'Target option:', data[targetIndex]?.option)
       
       setPrizeNumber(targetIndex)
     }
-  }, [mustSpin, hasSpunOnce, data])
+  }, [mustSpin, attemptCount, data])
 
   const handleStopSpinning = () => {
     setMustSpin(false)
     
-    // Usar o índice atual para determinar o resultado
-    const finalResult = data[prizeNumber]?.option || (!hasSpunOnce ? "Try Again" : "75% OFF")
+    // Mapear índices para nomes de resultados CORRETAMENTE
+    const resultNames = [
+      '75% off',        // índice 0 - corresponde ao data[0].option
+      '50% off',        // índice 1 - corresponde ao data[1].option  
+      '25% off',        // índice 2 - corresponde ao data[2].option
+      '5% off',         // índice 3 - corresponde ao data[3].option
+      '30% off',        // índice 4 - corresponde ao data[4].option
+      '10% off',        // índice 5 - corresponde ao data[5].option
+      'Free shipping',  // índice 6 - corresponde ao data[6].option
+      'Try Again'       // índice 7 - corresponde ao data[7].option
+    ];
     
-    console.log('🛑 Roleta parou! Index:', prizeNumber, 'Resultado:', finalResult)
+    // Usar o índice atual para determinar o resultado
+    const finalResult = resultNames[prizeNumber] || "Try Again"
+    
+    console.log('🛑 Roleta parou! Index:', prizeNumber, 'Resultado:', finalResult, 'AttemptCount:', attemptCount)
+    console.log('🔍 Mapeamento: data[' + prizeNumber + '].option =', data[prizeNumber]?.option, '-> finalResult =', finalResult)
     
     // Chamar imediatamente sem delay
     onSpinComplete(finalResult)
@@ -94,37 +180,65 @@ const ProfessionalRoulette = ({
     mustSpin, 
     prizeNumber, 
     hasSpunOnce,
-    targetOption: data[prizeNumber]?.option,
-    tentativa: hasSpunOnce ? 'SEGUNDA' : 'PRIMEIRA',
-    deveriaCairEm: hasSpunOnce ? '75% OFF' : 'Try Again'
+    targetOption: ['75%', '50%', '25%', '5%', '30%', '10%', 'FRETE GRÁTIS', 'Try Again'][prizeNumber] || 'Unknown',
+    tentativa: attemptCount,
+    deveriaCairEm: attemptCount === 1 ? 'Try Again' : '75%'
   })
 
   return (
     <div className="flex flex-col items-center space-y-6 w-full">
       <div className="relative flex items-center justify-center w-full">
-        <div className="w-96 h-96 flex items-center justify-center">
+        <div className="w-80 h-80 flex items-center justify-center relative">
+          {/* Roleta principal */}
           <Wheel
             mustStartSpinning={mustSpin}
             prizeNumber={prizeNumber % data.length}
             data={data}
             onStopSpinning={handleStopSpinning}
             spinDuration={0.8}
-            outerBorderColor="#232F3E"
-            outerBorderWidth={5}
-            radiusLineColor="#FF9900" 
-            radiusLineWidth={2}
+            outerBorderColor="#000000"
+            outerBorderWidth={8}
+            radiusLineColor="#000000" 
+            radiusLineWidth={3}
             fontSize={14}
-            textDistance={65}
+            fontWeight="bold"
+            textDistance={60}
+            innerRadius={25}
+            innerBorderColor="#FFFFFF"
+            innerBorderWidth={4}
+            perpendicularText={false}
           />
-        </div>
-        
-        {/* Custom Amazon-themed Pointer */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-3 z-20">
-          <div className="relative">
-            {/* Main Arrow */}
-            <div className="w-0 h-0 border-l-8 border-r-8 border-b-16 border-l-transparent border-r-transparent border-b-orange-500 drop-shadow-lg"></div>
-            {/* Arrow outline */}
-            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-10 border-r-10 border-b-18 border-l-transparent border-r-transparent border-b-gray-800"></div>
+          
+          {/* Centro dourado com "GIRE" - BOTÃO CLICÁVEL */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <button
+              onClick={handleSpinClick}
+              disabled={rouletteState !== 'idle' || attemptCount >= 3}
+              className="w-20 h-20 rounded-full flex items-center justify-center text-black font-bold text-lg z-30 shadow-lg border-4 border-white transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              style={{ 
+                background: rouletteState === 'idle' 
+                  ? 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%)'
+                  : 'linear-gradient(135deg, #B8860B 0%, #D4AF37 50%, #FFD700 100%)'
+              }}
+            >
+              {rouletteState === 'spinning' ? (
+                <div className="text-sm font-bold">
+                  <div className="animate-spin text-base">⟳</div>
+                </div>
+              ) : rouletteState === 'stopping' ? (
+                <div className="text-sm font-bold animate-pulse">
+                  STOP
+                </div>
+              ) : attemptCount >= 3 ? (
+                <div className="text-xs font-bold text-gray-600">
+                  NO MORE<br/>CHANCES
+                </div>
+              ) : (
+                <div className="text-base font-black">
+                  GIRE
+                </div>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -175,12 +289,24 @@ export default function AmazonPrimeQuiz() {
   const [spinResult, setSpinResult] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [hasSpunOnce, setHasSpunOnce] = useState(false)
+  const [attemptCount, setAttemptCount] = useState(0) // Novo state para controlar tentativas
 
-  console.log('📊 ESTADO ATUAL: hasSpunOnce =', hasSpunOnce, '| currentPage =', currentPage)
+  console.log('📊 ESTADO ATUAL: hasSpunOnce =', hasSpunOnce, '| currentPage =', currentPage, '| attemptCount =', attemptCount)
+  console.log('🎯 CHANCES RESTANTES CALCULADAS:', Math.max(0, 3 - attemptCount), '| Deveria ser 3 no início')
   
   // Estados HTTP para controle da roleta
   const [rouletteState, setRouletteState] = useState<'idle' | 'spinning' | 'stopping' | 'completed'>('idle')
   const [mustSpin, setMustSpin] = useState(false)
+  
+  // Garantir que attemptCount seja resetado quando chegar na página da roleta
+  useEffect(() => {
+    if (currentPage === 6 && attemptCount > 0) {
+      console.log('🔄 Resetando attemptCount para 0 ao entrar na página da roleta')
+      setAttemptCount(0)
+      setHasSpunOnce(false)
+      setRouletteState('idle')
+    }
+  }, [currentPage])
   
   // Estados para debug dos áudios
   const [audio1Loaded, setAudio1Loaded] = useState(false)
@@ -284,8 +410,8 @@ export default function AmazonPrimeQuiz() {
   // Debug: Monitorar mudanças no hasSpunOnce
   useEffect(() => {
     console.log('🔄 hasSpunOnce MUDOU:', hasSpunOnce)
-    console.log('📊 Próxima tentativa será:', hasSpunOnce ? 'SEGUNDA (75% OFF)' : 'PRIMEIRA (Try Again)')
-  }, [hasSpunOnce])
+    console.log('📊 Próxima tentativa será:', attemptCount === 1 ? 'PRIMEIRA (Try Again)' : 'SEGUNDA (75% OFF)')
+  }, [attemptCount])
 
   // Pré-carregar áudios e detectar duração quando o componente monta
   useEffect(() => {
@@ -359,28 +485,38 @@ export default function AmazonPrimeQuiz() {
   }
 
   const handleSpinClick = async () => {
-    if (rouletteState === 'idle') {
+    if (rouletteState === 'idle' && attemptCount < 3) {
       console.log('🚀 INICIANDO SPIN!')
-      console.log('📊 hasSpunOnce NO INÍCIO DO SPIN:', hasSpunOnce)
-      console.log('📊 Esta é a tentativa:', hasSpunOnce ? 'SEGUNDA' : 'PRIMEIRA')
+      console.log('📊 attemptCount ANTES do incremento:', attemptCount)
+      
+      // CRÍTICO: Incrementar contador de tentativas PRIMEIRO
+      const novoAttemptCount = attemptCount + 1
+      setAttemptCount(novoAttemptCount)
+      
+      console.log('📊 attemptCount DEPOIS do incremento:', novoAttemptCount)
+      console.log('📊 Esta é a tentativa:', novoAttemptCount === 1 ? 'PRIMEIRA' : novoAttemptCount === 2 ? 'SEGUNDA' : 'TERCEIRA+')
       
       setIsSpinning(true)
       setRouletteState('spinning')
-      setMustSpin(true)
+      
+      // Usar setTimeout para garantir que o state foi atualizado antes de mustSpin
+      setTimeout(() => {
+        setMustSpin(true)
+      }, 100)
       
       // Tracking da roleta sendo girada
       trackRouletteSpin()
       
-      // Tracking específico da tentativa (primeira ou segunda)
-      if (!hasSpunOnce) {
+      // Tracking específico da tentativa
+      if (novoAttemptCount === 1) {
         trackRoletaPrimeiraGirada()
-      } else {
+      } else if (novoAttemptCount === 2) {
         trackRoletaSegundaGirada()
       }
       
       // Tocar o áudio correto com tratamento de erro
       try {
-        if (!hasSpunOnce) {
+        if (novoAttemptCount === 1) {
           console.log('🎵 Tentando tocar áudio 1...')
           if (audio1Ref.current) {
             audio1Ref.current.currentTime = 0 // Reset para o início
@@ -409,19 +545,10 @@ export default function AmazonPrimeQuiz() {
 
   const handleSpinComplete = (result: string) => {
     console.log('🎯 Spin Complete! Result:', result)
-    console.log('📊 hasSpunOnce ANTES:', hasSpunOnce)
-    console.log('📊 States before update:', { hasSpunOnce, showModal, rouletteState })
+    console.log('📊 attemptCount atual:', attemptCount)
+    console.log('🔍 Verificando se é Try Again:', result === 'Try Again')
     
     setRouletteState('stopping')
-    
-    // Verificar se o resultado está correto baseado na tentativa
-    const expectedResult = !hasSpunOnce ? "Try Again" : "75% OFF"
-    if (result !== expectedResult) {
-      console.error('❌ RESULTADO ERRADO! Esperado:', expectedResult, 'Recebido:', result)
-      console.error('❌ hasSpunOnce atual:', hasSpunOnce)
-    } else {
-      console.log('✅ Resultado correto:', result)
-    }
     
     // Parar os áudios quando a roleta terminar
     try {
@@ -441,8 +568,10 @@ export default function AmazonPrimeQuiz() {
     if (result !== 'Try Again') {
       trackDiscountWon(result)
       trackResultadoDesconto(result) // Evento em português
+      console.log('✅ Tracking: Desconto ganho -', result)
     } else {
       trackResultadoTryAgain() // Evento em português para Try Again
+      console.log('✅ Tracking: Try Again')
     }
     
     // Mostrar modal imediatamente
@@ -452,11 +581,10 @@ export default function AmazonPrimeQuiz() {
     setRouletteState('completed')
     setShowModal(true)
     
-    if (!hasSpunOnce) {
-      console.log('✅ CHAMANDO setHasSpunOnce(true) - ERA PRIMEIRA TENTATIVA')
+    // Atualizar hasSpunOnce se necessário
+    if (attemptCount === 1) {
+      console.log('✅ PRIMEIRA tentativa concluída - setHasSpunOnce(true)')
       setHasSpunOnce(true)
-    } else {
-      console.log('📊 hasSpunOnce já era true - ESTA É A SEGUNDA TENTATIVA')
     }
   }
 
@@ -549,7 +677,7 @@ export default function AmazonPrimeQuiz() {
             disabled={!selectedAnswers[questionIndex]}
             className="w-full bg-yellow-400 hover:bg-yellow-500 text-white py-3 text-lg font-semibold rounded-xl shadow-md"
           >
-            redeem roulette spins
+            next
           </Button>
         </div>
       </div>
@@ -613,7 +741,7 @@ export default function AmazonPrimeQuiz() {
             onClick={nextPage}
             className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-4 text-lg font-semibold mb-4"
           >
-            redeem roulette spins
+            next
           </Button>
         </div>
       </div>
@@ -629,7 +757,7 @@ export default function AmazonPrimeQuiz() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-200 rounded-full opacity-10 animate-ping"></div>
       </div>
 
-      <header className="text-white p-4 text-center relative z-10" style={{ backgroundColor: "#0f151b" }}>
+      <header className="text-white text-center relative z-10" style={{ backgroundColor: "#0f151b" }}>
         <div className="flex flex-col items-center">
           <Image
             src="/logo.png"
@@ -642,16 +770,16 @@ export default function AmazonPrimeQuiz() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center relative">
         <div className="text-center mb-8">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
+          <div className="backdrop-blur-sm rounded-2xl p-6 border border-white/20">
             <h2 className="text-3xl font-bold text-white mb-3 drop-shadow-lg">
               🎯 Spin the Wheel and Win!
             </h2>
             <p className="text-white/90 text-lg mb-4">
               Discover your exclusive Prime Day discount
             </p>
-            <div className="flex justify-center space-x-4 text-white/80">
+            <div className="flex justify-center space-x-4 text-white/80 mb-4">
               <div className="flex items-center space-x-1">
                 <Star className="w-4 h-4 text-yellow-300" />
                 <span className="text-sm">Up to 80% OFF</span>
@@ -664,6 +792,12 @@ export default function AmazonPrimeQuiz() {
                 <Gift className="w-4 h-4 text-yellow-300" />
                 <span className="text-sm">Exclusive Offers</span>
               </div>
+            </div>
+            {/* Contador de tentativas */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 inline-block">
+              <span className="text-white font-semibold text-sm">
+                🎲 Chances remaining: <span className="text-yellow-300 font-bold">{Math.max(0, 3 - attemptCount)}/3</span>
+              </span>
             </div>
           </div>
         </div>
@@ -701,107 +835,200 @@ export default function AmazonPrimeQuiz() {
               mustSpin={mustSpin}
               setMustSpin={setMustSpin}
               hasSpunOnce={hasSpunOnce}
+              handleSpinClick={handleSpinClick}
+              rouletteState={rouletteState}
+              attemptCount={attemptCount}
             />
           </div>
-          
-          
         </div>
 
         <div className="mt-8 text-center">
-          <Button
-            onClick={handleSpinClick}
-            disabled={rouletteState !== 'idle'}
-            className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white px-12 py-4 text-xl font-bold rounded-full disabled:opacity-50 shadow-2xl transform hover:scale-105 transition-all duration-200"
-          >
-            {rouletteState === 'spinning' ? (
-              <div className="flex items-center space-x-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span>SPINNING...</span>
-              </div>
-            ) : rouletteState === 'stopping' ? (
-              <div className="flex items-center space-x-3">
-                <div className="animate-pulse rounded-full h-6 w-6 bg-white"></div>
-                <span>STOPPING...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <Zap className="w-6 h-6" />
-                <span>SPIN NOW!</span>
-              </div>
-            )}
-          </Button>
-          
-          <p className="text-white/70 text-sm mt-4">
-            {rouletteState === 'idle' && '⚡ Click and discover your luck! ⚡'}
+          <p className="text-white/70 text-sm">
+            {rouletteState === 'idle' && attemptCount < 3 && '⚡ Click GIRE to spin and discover your luck! ⚡'}
+            {rouletteState === 'idle' && attemptCount >= 3 && '🚫 No more attempts remaining'}
             {rouletteState === 'spinning' && '🎲 The wheel is spinning...'}
             {rouletteState === 'stopping' && '🛑 The wheel is stopping...'}
             {rouletteState === 'completed' && '✅ Result ready!'}
           </p>
+          {attemptCount < 3 && rouletteState === 'idle' && (
+            <p className="text-white/50 text-xs mt-2">
+              {attemptCount === 0 && 'You have 3 chances to win amazing discounts!'}
+              {attemptCount === 1 && 'You have 2 more chances to win!'}
+              {attemptCount === 2 && 'This is your final chance - make it count!'}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Modal for spin results */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="max-w-md mx-auto border-0 shadow-2xl animate-in zoom-in-95 duration-300">
+      <Dialog open={showModal} onOpenChange={() => {}}>
+        <DialogContent className="max-w-lg mx-auto border-0 shadow-2xl animate-in zoom-in-95 duration-300 [&>button]:hidden bg-white">
           <DialogTitle className="sr-only">
             {spinResult === "Try Again" ? "Resultado da Roleta - Tente Novamente" : "Resultado da Roleta - Parabéns!"}
           </DialogTitle>
           {spinResult === "Try Again" ? (
-            <div className="text-center p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
-              <div className="relative mb-6">
-                <div className="text-8xl mb-4 animate-bounce">😢</div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold animate-pulse">
-                  !
+            // MODAL TRY AGAIN - DESIGN PROFISSIONAL
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100">
+              {/* Header com badge de tentativas */}
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold">🎯</span>
+                    </div>
+                    <h3 className="text-lg font-bold">Prime Day Roulette</h3>
+                  </div>
+                  <div className="bg-white/20 px-3 py-1 rounded-full">
+                    <span className="text-sm font-semibold">Attempt {attemptCount}/3</span>
+                  </div>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-800">Oops! Try Again</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">
-                Don’t give up! You’ve been selected for an <strong className="text-purple-600">extra chance</strong>!
-              </p>
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                <p className="text-purple-700 text-sm">
-                  💡 Tip: Many users win on their second try!
+
+              {/* Content */}
+              <div className="p-6">
+                {/* Result icon and message */}
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🎲</span>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-800 mb-2">Not this time!</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Don't worry! You still have <strong className="text-orange-600">{Math.max(0, 3 - attemptCount)} chance{Math.max(0, 3 - attemptCount) !== 1 ? 's' : ''} remaining</strong> to win your exclusive Prime Day discount.
+                  </p>
+                </div>
+
+                {/* Progress bar for attempts */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-500">Chances Used</span>
+                    <span className="text-xs font-medium text-gray-500">{attemptCount}/3</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full transition-all duration-500" 
+                      style={{ width: `${(attemptCount / 3) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Encouragement message */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-blue-600 text-sm">💡</span>
+                    </div>
+                    <div>
+                      <h5 className="font-semibold text-blue-800 text-sm mb-1">Did you know?</h5>
+                      <p className="text-blue-700 text-xs leading-relaxed">
+                        Our statistics show that {attemptCount === 1 ? '67%' : '89%'} of users win a discount on their {attemptCount === 1 ? 'second' : 'final'} attempt!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action button */}
+                <Button 
+                  onClick={closeModal} 
+                  className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                >
+                  <span className="flex items-center justify-center space-x-2">
+                    <span>🎯</span>
+                    <span>Try Again ({Math.max(0, 3 - attemptCount)} left)</span>
+                  </span>
+                </Button>
+
+                {/* Footer note */}
+                <p className="text-center text-xs text-gray-500 mt-4">
+                  ⏰ Offer expires in 24 hours - Limited time only
                 </p>
               </div>
-              <Button 
-                onClick={closeModal} 
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-xl transform hover:scale-105 transition-all duration-200"
-              >
-                🔄 Try Again
-              </Button>
             </div>
           ) : (
-            <div className="text-center p-8 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl">
-              <div className="relative mb-6">
-                <div className="text-8xl mb-4 animate-bounce">🎉</div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold animate-pulse">
-                  ✓
+            // MODAL VICTORY - DESIGN PROFISSIONAL
+            <div className="relative overflow-hidden rounded-2xl bg-white">
+              {/* Success header */}
+              <div className="bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold">🏆</span>
+                    </div>
+                    <h3 className="text-lg font-bold">Congratulations!</h3>
+                  </div>
+                  <div className="bg-white/20 px-3 py-1 rounded-full">
+                    <span className="text-sm font-semibold">Winner!</span>
+                  </div>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-800">Congratulations! 🎊</h3>
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 rounded-xl mb-6">
-                <p className="text-lg font-bold mb-2">
-                  You won: <span className="text-3xl">{spinResult === '80% OFF' ? '80% OFF' : spinResult}</span>
-                </p>
-                <p className="text-sm opacity-90">
-                  Exclusive Prime Day discount!
-                </p>
-              </div>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-center space-x-2 text-green-700">
-                  <Star className="w-5 h-5" />
-                  <span className="font-semibold">Limited Offer!</span>
+
+              {/* Prize display */}
+              <div className="p-6">
+                <div className="text-center mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <span className="text-3xl">🎉</span>
+                  </div>
+                  <h4 className="text-2xl font-bold text-gray-800 mb-2">You Won!</h4>
+                  
+                  {/* Prize card */}
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-4 mb-4">
+                    <p className="text-gray-600 text-sm mb-1">Your exclusive Prime Day discount:</p>
+                    <p className="text-3xl font-black text-orange-600">
+                      {spinResult === 'Free shipping' ? 'FREE SHIPPING' : 
+                       spinResult === '75% off' ? '75% OFF' :
+                       spinResult === '50% off' ? '50% OFF' :
+                       spinResult === '25% off' ? '25% OFF' :
+                       spinResult === '30% off' ? '30% OFF' :
+                       spinResult === '10% off' ? '10% OFF' :
+                       spinResult === '5% off' ? '5% OFF' :
+                       spinResult}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-green-600 text-sm mt-1">
-                  Valid for 24 hours only
-                </p>
+
+                {/* Urgency banner */}
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-red-500 text-lg">⏰</span>
+                    <div>
+                      <p className="text-red-800 font-semibold text-sm">Limited Time Offer</p>
+                      <p className="text-red-700 text-xs">This discount expires in 24 hours</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main CTA button */}
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => handleBuyClick(spinResult || undefined)} 
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-xl text-lg"
+                  >
+                    <span className="flex items-center justify-center space-x-2">
+                      <span>🛒</span>
+                      <span>Claim Discount Now</span>
+                      <span>→</span>
+                    </span>
+                  </Button>
+                  
+                  {/* Secondary info */}
+                  <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
+                    <span className="flex items-center space-x-1">
+                      <span>🔒</span>
+                      <span>Secure checkout</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <span>📦</span>
+                      <span>Fast delivery</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Social proof */}
+                <div className="bg-gray-50 rounded-lg p-3 mt-4">
+                  <p className="text-center text-xs text-gray-600">
+                    🔥 <strong>2,847</strong> customers claimed their discount today
+                  </p>
+                </div>
               </div>
-              <Button 
-                onClick={() => handleBuyClick(spinResult || undefined)} 
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transform hover:scale-105 transition-all duration-200"
-              >
-                🎁 Redeem Now
-              </Button>
             </div>
           )}
         </DialogContent>
