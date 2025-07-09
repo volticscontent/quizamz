@@ -42,7 +42,7 @@ export const useTracking = () => {
   }, [trackEvent])
 
   const trackRouletteSpin = useCallback(() => {
-    trackEvent('InitiateCheckout', {
+    trackEvent('ViewContent', {
       content_name: 'Roulette Spin',
       content_category: 'engagement'
     })

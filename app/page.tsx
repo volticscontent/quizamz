@@ -40,7 +40,8 @@ const ProfessionalRoulette = ({
   hasSpunOnce,
   handleSpinClick,
   rouletteState,
-  attemptCount
+  attemptCount,
+  rouletteData
 }: {
   onSpinComplete: (result: string) => void
   isSpinning: boolean
@@ -50,15 +51,16 @@ const ProfessionalRoulette = ({
   handleSpinClick: () => void
   rouletteState: 'idle' | 'spinning' | 'stopping' | 'completed'
   attemptCount: number
+  rouletteData: Array<{option: string, style: any}>
 }) => {
   const [prizeNumber, setPrizeNumber] = useState(0)
 
-  // Dados da roleta - REPLICANDO EXATAMENTE O DESIGN DA IMAGEM
+  // Dados da roleta - CORRIGIDO PARA CONSISTÊNCIA
   const data = [
     { 
       option: '75% off',
       style: { 
-        backgroundColor: '#E91E63', // Rosa/Pink
+        backgroundColor: 'rgb(15, 21, 27)', // Rosa/Pink
         textColor: '#FFFFFF',
         fontSize: 22
       } 
@@ -66,7 +68,7 @@ const ProfessionalRoulette = ({
     { 
       option: '50% off',
       style: { 
-        backgroundColor: '#4ECDC4', // Verde água/Turquesa  
+        backgroundColor: '#FF5722', // Verde água/Turquesa  
         textColor: '#FFFFFF',
         fontSize: 22
       } 
@@ -74,7 +76,7 @@ const ProfessionalRoulette = ({
     { 
       option: '25% off',
       style: { 
-        backgroundColor: '#2196F3', // Azul
+        backgroundColor: 'rgb(15, 21, 27)', // Azul
         textColor: '#FFFFFF',
         fontSize: 22
       } 
@@ -82,8 +84,8 @@ const ProfessionalRoulette = ({
     { 
       option: '5% off',
       style: { 
-        backgroundColor: '#FFC107', // Amarelo/Dourado
-        textColor: '#000000',
+        backgroundColor: 'rgb(255, 255, 255)', // Amarelo/Dourado
+        textColor: 'rgb(15, 21, 27)',
         fontSize: 22
       } 
     }, // ÍNDICE 3
@@ -98,24 +100,16 @@ const ProfessionalRoulette = ({
     { 
       option: '10% off',
       style: { 
-        backgroundColor: '#9C27B0', // Roxo
+        backgroundColor: 'rgb(15, 21, 27)', // Roxo
         textColor: '#FFFFFF',
         fontSize: 22
       } 
-    }, // ÍNDICE 5
-    { 
-      option: 'Free shipping',
-      style: { 
-        backgroundColor: '#607D8B', // Cinza azulado
-        textColor: '#FFFFFF',
-        fontSize: 22
-      } 
-    }, // ÍNDICE 6
+    }, // ÍNDICE 5 // ÍNDICE 6
     { 
       option: 'Try Again',
       style: { 
-        backgroundColor: '#795548', // Marrom
-        textColor: '#FFFFFF',
+        backgroundColor: 'rgb(255, 255, 255)', // Marrom
+        textColor: 'rgb(15, 21, 27)',
         fontSize: 22
       } 
     } // ÍNDICE 7 - Try Again na primeira tentativa
@@ -126,20 +120,23 @@ const ProfessionalRoulette = ({
       console.log('🎲 Iniciando spin - Tentativa:', attemptCount)
       console.log('🔍 mustSpin =', mustSpin, '| attemptCount =', attemptCount)
       
-      // LÓGICA CORRIGIDA: usar attemptCount atual (já incrementado)
+      // LÓGICA CORRIGIDA: Determinar targetIndex baseado no attemptCount atual
       let targetIndex: number
+      
       if (attemptCount === 1) {
-        targetIndex = 7 // PRIMEIRA TENTATIVA: "Try Again" (índice 7)
+        // PRIMEIRA TENTATIVA: "Try Again" (índice 7)
+        targetIndex = 7
         console.log('🎯 PRIMEIRA tentativa (attemptCount=1) - deve cair em Try Again (índice 7)')
         console.log('🔍 data[7].option =', data[7]?.option)
       } else if (attemptCount === 2) {
-        targetIndex = 0 // SEGUNDA TENTATIVA: "75% off" (índice 0)  
+        // SEGUNDA TENTATIVA: "75% off" (índice 0)
+        targetIndex = 0
         console.log('🎯 SEGUNDA tentativa (attemptCount=2) - deve cair em 75% off (índice 0)')
         console.log('🔍 data[0].option =', data[0]?.option)
       } else {
-        // Terceira tentativa ou mais - resultado aleatório entre descontos
-        const discountIndexes = [0, 1, 2, 3, 4, 5, 6]; // Todos exceto Try Again
-        targetIndex = discountIndexes[Math.floor(Math.random() * discountIndexes.length)];
+        // TERCEIRA TENTATIVA ou mais: resultado aleatório entre descontos (excluindo Try Again)
+        const discountIndexes = [0, 1, 2, 3, 4, 5, 6]; // Todos os prêmios exceto Try Again (índice 7)
+        targetIndex = discountIndexes[Math.floor(Math.random() * discountIndexes.length)]
         console.log('🎯 TERCEIRA+ tentativa (attemptCount=' + attemptCount + ') - resultado random (índice ' + targetIndex + ')')
         console.log('🔍 data[' + targetIndex + '].option =', data[targetIndex]?.option)
       }
@@ -214,7 +211,7 @@ const ProfessionalRoulette = ({
             <button
               onClick={handleSpinClick}
               disabled={rouletteState !== 'idle' || attemptCount >= 3}
-              className="w-20 h-20 rounded-full flex items-center justify-center text-black font-bold text-lg z-30 shadow-lg border-4 border-white transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-20 h-20 rounded-full flex items-center justify-center text-black font-bold text-lg z-30 shadow-lg border-4 border[] transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               style={{ 
                 background: rouletteState === 'idle' 
                   ? 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #B8860B 100%)'
@@ -235,7 +232,7 @@ const ProfessionalRoulette = ({
                 </div>
               ) : (
                 <div className="text-base font-black">
-                  GIRE
+                  SPIN
                 </div>
               )}
             </button>
@@ -489,17 +486,17 @@ export default function AmazonPrimeQuiz() {
       console.log('🚀 INICIANDO SPIN!')
       console.log('📊 attemptCount ANTES do incremento:', attemptCount)
       
-      // CRÍTICO: Incrementar contador de tentativas PRIMEIRO
+      // Incrementar contador de tentativas
       const novoAttemptCount = attemptCount + 1
-      setAttemptCount(novoAttemptCount)
-      
       console.log('📊 attemptCount DEPOIS do incremento:', novoAttemptCount)
       console.log('📊 Esta é a tentativa:', novoAttemptCount === 1 ? 'PRIMEIRA' : novoAttemptCount === 2 ? 'SEGUNDA' : 'TERCEIRA+')
       
+      // Atualizar o state
+      setAttemptCount(novoAttemptCount)
       setIsSpinning(true)
       setRouletteState('spinning')
       
-      // Usar setTimeout para garantir que o state foi atualizado antes de mustSpin
+      // Aguardar um pouco para garantir que o state foi atualizado
       setTimeout(() => {
         setMustSpin(true)
       }, 100)
@@ -519,7 +516,7 @@ export default function AmazonPrimeQuiz() {
         if (novoAttemptCount === 1) {
           console.log('🎵 Tentando tocar áudio 1...')
           if (audio1Ref.current) {
-            audio1Ref.current.currentTime = 0 // Reset para o início
+            audio1Ref.current.currentTime = 0
             await audio1Ref.current.play()
             console.log('✅ Áudio 1 tocando!')
           } else {
@@ -528,7 +525,7 @@ export default function AmazonPrimeQuiz() {
         } else {
           console.log('🎵 Tentando tocar áudio 2...')
           if (audio2Ref.current) {
-            audio2Ref.current.currentTime = 0 // Reset para o início
+            audio2Ref.current.currentTime = 0
             await audio2Ref.current.play()
             console.log('✅ Áudio 2 tocando!')
           } else {
@@ -537,7 +534,6 @@ export default function AmazonPrimeQuiz() {
         }
       } catch (error) {
         console.error('❌ Erro ao tocar áudio:', error)
-        // Nota: Alguns navegadores bloqueiam autoplay de áudio
         console.log('💡 Dica: O navegador pode estar bloqueando o autoplay de áudio')
       }
     }
@@ -838,6 +834,7 @@ export default function AmazonPrimeQuiz() {
               handleSpinClick={handleSpinClick}
               rouletteState={rouletteState}
               attemptCount={attemptCount}
+              rouletteData={[]}
             />
           </div>
         </div>
